@@ -1,4 +1,4 @@
 # Assume the virtualenv is called .env
 
-cp frameworkpython .env/bin
-.env/bin/frameworkpython -m IPython notebook
+cp frameworkpython /Users/Bink/anaconda3/envs/cs231n/bin/ 
+/Users/Bink/anaconda3/envs/cs231n/bin/frameworkpython -m IPython notebook
