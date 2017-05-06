@@ -32,8 +32,22 @@ def softmax_loss_naive(W, X, y, reg):
   #############################################################################
   num_train = X.shape[0]
   num_class = W.shape[1]
+
+  scores = X.dot(W)
   for i in range(num_train):
-    loss += - np.log(np.exp(X[i].dot()))
+    score = scores[i]
+    logC = -np.max(score)
+    score = score + logC
+    loss += - np.log(np.exp(score[y[i]])/np.sum(np.exp(score)))
+    for j in range(num_class):
+      softmax_output = np.exp(score[j]) / np.sum(np.exp(score))
+      if j == y[i]:
+        dW[:, j] += (-1 + softmax_output) * X[i].T
+      else:
+        dW[:, j] += softmax_output * X[i].T
+
+  loss = loss/num_train + 0.5*reg*np.sum(W*W)
+  dW = dW/num_train + reg * W
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
@@ -50,14 +64,27 @@ def softmax_loss_vectorized(W, X, y, reg):
   # Initialize the loss and gradient to zero.
   loss = 0.0
   dW = np.zeros_like(W)
-
+  num_train = X.shape[0]
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using no explicit loops.  #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  scores = X.dot(W)
+  logC = -np.max(scores,axis=1)
+  scores = scores + logC.reshape((-1,1))
+  sum_j = np.sum(np.exp(scores),axis=1).reshape((-1,1))
+  score_yi = scores[np.arange(0,num_train,1),y].reshape((-1,1))
+  loss = np.sum(-np.log(np.exp(score_yi)/sum_j))
+  softmax_output = np.exp(scores)/sum_j
+  indh = np.zeros_like(softmax_output)
+  indh[np.arange(0,num_train,1),y] = 1
+  dW = X.T.dot(softmax_output-indh)
+  loss = loss / num_train + 0.5 * reg * np.sum(W * W)
+  dW = dW/num_train + reg*W
+
+
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
